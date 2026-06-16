@@ -40,15 +40,15 @@ public class AuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
         String redisKey = TOKEN_PREFIX + token;
 
-        // 4. Hit ke Redis/Valkey buat nyari UUID User
-        Object cachedUuid = redisTemplate.opsForValue().get(redisKey);
+        // 4. Hit ke Redis/Valkey buat nyari ID User
+        Object cachedId = redisTemplate.opsForValue().get(redisKey);
 
-        if (cachedUuid != null) {
-            String userUuid = cachedUuid.toString();
+        if (cachedId != null) {
+            Long userId = ((Number) cachedId).longValue();
 
             // 5. Daftarkan user ke Spring Security Context (Tanpa password & tanpa role ribet dulu)
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userUuid, // Kita taruh UUID sebagai Principal
+                    userId, // Kita taruh ID internal (Long) sebagai Principal
                     null,
                     Collections.emptyList() // Kosongkan authorities/roles sementara
             );

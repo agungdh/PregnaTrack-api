@@ -32,7 +32,7 @@ public class AuthService {
         // 4. Simpan ke Redis. Key: auth:token:<string>, Value: user_uuid (atau user_id)
         // Kita set TTL nya 24 Jam
         String redisKey = TOKEN_PREFIX + opaqueToken;
-        redisTemplate.opsForValue().set(redisKey, user.getUuid(), 24, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set(redisKey, user.getId(), 24, TimeUnit.HOURS);
 
         // 5. Balikin token ke Frontend
         return opaqueToken;
