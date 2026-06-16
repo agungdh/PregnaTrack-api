@@ -2,6 +2,7 @@ package id.my.agungdh.pregnatrack.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +13,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final PasswordEncoder passwordEncoder;
 
     // Prefix biar key di Redis rapi, misal: auth:token:xxxx-xxxx
     private static final String TOKEN_PREFIX = "auth:token:";
@@ -21,8 +23,8 @@ public class AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("Email atau password salah"));
 
-        // 2. TODO: Validasi password pake BCrypt (sementara cocokin string polos dulu)
-        if (!user.getPassword().equals(request.password())) {
+        // 2. Validasi password pake BCrypt
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new RuntimeException("Email atau password salah");
         }
 
