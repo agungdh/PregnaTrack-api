@@ -14,21 +14,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Matikan CSRF jika kamu mengembangkan REST API stateless (misal pake JWT)
+                // 1. Matikan CSRF karena kita pake REST API berbasis stateless
                 .csrf(AbstractHttpConfigurer::disable)
 
                 // 2. Atur otorisasi request
                 .authorizeHttpRequests(auth -> auth
-                        // Daftarkan semua endpoint Swagger & OpenAPI agar diizinkan tanpa login
+                        // Cuma izinkan Swagger, OpenAPI docs, dan Endpoint Login
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/api-docs/**" // Sesuai path yang kamu set di application.yml kemarin
+                                "/api-docs/**",
+                                "/api/auth/login" // <--- Murni ini doang buat jalur masuk
                         ).permitAll()
 
-                        // Endpoint lain (misal API utama PregnaTrack) wajib login
+                        // Endpoint sisanya (termasuk CRUD user) mutlak wajib login
                         .anyRequest().authenticated()
                 );
 
