@@ -6,6 +6,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -51,10 +53,31 @@ public abstract class BaseEntity {
         if (this.uuid == null) {
             this.uuid = UUID.randomUUID().toString();
         }
+
+        // Isi otomatis _by dari user yang sedang login (null jika anonymous)
+        Long currentUserId = getCurrentUserId();
+        this.createdBy = currentUserId;
+        this.updatedBy = currentUserId;
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = Instant.now().toEpochMilli();
+        this.updatedBy = getCurrentUserId();
+    }
+
+    private Long getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return null;
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof Long id) {
+            return id;
+        }
+        if (principal instanceof Number n) {
+            return n.longValue();
+        }
+        return null;
     }
 }
